@@ -50,7 +50,7 @@ def prebivalstvo_podatki(url):
        return None
    return page_content
 
-# print(prebivalstvo_podatki(prebivalstvo_api_url))
+#print(prebivalstvo_podatki(prebivalstvo_api_url))
 
 #rezultat = prebivalstvo_podatki(prebivalstvo_api_url)
 #print(rezultat.keys())  # kateri so glavni ključi v odgovoru?
@@ -59,17 +59,14 @@ def prebivalstvo_podatki(url):
 
 def prebivalstvo_v_vrstice(podatki):
     
-    obcine_naselja_dim = podatki['dimension']['OBČINE']['category']
+    obcine_naselja_dim = podatki['dimension']['OBČINA/NASELJE']['category']
     meritve_dim = podatki['dimension']['MERITVE']['category']
     leto_dim = podatki['dimension']['LETO']['category']
 
     # zamenjava ključev in vrednosti npr. namesto {'0': 0, '001': 1, '213': 2, '195': 3, ...} v {0: '0', 1: '001', 2: '213', 3: '195', ...}
     obcine_po_indeksu = {}
-    for k, v in obcine_dim['index'].items():
+    for k, v in obcine_naselja_dim['index'].items():
        obcine_po_indeksu[v] = k
-    drzave_po_indeksu = {}
-    for k, v in drzava_dim['index'].items():
-       drzave_po_indeksu[v] = k
     meritve_po_indeksu = {}
     for k, v in meritve_dim['index'].items():
        meritve_po_indeksu[v] = k
@@ -77,31 +74,57 @@ def prebivalstvo_v_vrstice(podatki):
     for k, v in leto_dim['index'].items():
        leta_po_indeksu[v] = k
 
-    #stevila turistov / prenočitev
+    #stevila prebivalcev
     vrednosti = podatki['value']
 
     #grajenje vrstic
     vrstice = []
     stevec = 0
     for obcina_indeks in range(213):
-        for drzava_indeks in range(2):
-            for meritev_indeks in range(2):
-                for leto_indeks in range(8):  
-                    vrednost = vrednosti[stevec]
-                    stevec += 1
+        for leto_indeks in range(8):  
+            vrednost = vrednosti[stevec]
+            stevec += 1
 
-                    obcina_koda = obcine_po_indeksu[obcina_indeks]
-                    drzava_koda = drzave_po_indeksu[drzava_indeks]
-                    meritev_koda = meritve_po_indeksu[meritev_indeks]
-                    leto_koda = leta_po_indeksu[leto_indeks]
-
-                    vrstica = {
-                        "obcina": obcine_dim['label'][obcina_koda],
-                        "poreklo": drzava_dim['label'][drzava_koda],
-                        "meritev": meritve_dim['label'][meritev_koda],
-                        "leto": leto_dim['label'][leto_koda],
-                        "vrednost": vrednost,
-                    }
-                    vrstice.append(vrstica)
+            obcina_koda = obcine_po_indeksu[obcina_indeks]
+            leto_koda = leta_po_indeksu[leto_indeks]
+            vrstica = {
+                "obcina": obcine_naselja_dim['label'][obcina_koda],
+                "leto": leto_dim['label'][leto_koda],
+                "vrednost": vrednost,
+            }
+            vrstice.append(vrstica)
 
     return vrstice
+
+#print(prebivalstvo_v_vrstice(prebivalstvo_podatki(prebivalstvo_api_url)))
+
+def write_csv(fieldnames, rows, directory, filename):
+    # fieldnames - imena stolpcev, rows - seznam slovarjev, directory - mapa kamor shrani datoteko s podatki, filename - ime datoteke s podatki
+    os.makedirs(directory, exist_ok=True)
+    path = os.path.join(directory, filename)
+    with open(path, 'w', encoding='utf-8', newline = "") as csv_file:
+        #newline - zahteva csv za pravilne prelome vrstic
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+    return
+
+def write_prebivalstvo_stevilke_to_csv(vrstice, directory, filename):
+    assert vrstice and (all(j.keys() == vrstice[0].keys() for j in vrstice))
+    fieldnames = list(vrstice[0].keys())
+    write_csv(fieldnames, vrstice, directory, filename)
+    
+def main():
+    # Podatki iz API-ja
+    podatki = prebivalstvo_podatki(prebivalstvo_api_url)
+
+    # Podatke pretvorimo v seznam slovarjev
+    vrstice = prebivalstvo_v_vrstice(podatki)
+
+    # Podatke shranimo v csv datoteko
+    write_prebivalstvo_stevilke_to_csv(vrstice, prebivalstvo_directory, csv_filename)
+
+
+if __name__ == '__main__':
+    main()
