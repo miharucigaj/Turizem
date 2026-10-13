@@ -4,15 +4,10 @@ import json
 import requests
 
 turizem_api_url = 'https://pxweb.stat.si:443/SiStatData/api/v1/sl/Data/2164525S.px'
-# mapa, v katero bomo shranili podatke
 turizem_directory = 'podatki'
-# ime datoteke v katero bomo shranili glavno stran
-frontpage_filename = 'turizem_prihodi.json'
-# ime CSV datoteke v katero bomo shranili podatke
 csv_filename = 'turizem_prihodi.csv'
 
-
-# print(requests.get(turizem_api_url).json()) - preverjanje imen ključev
+# print(requests.get(turizem_api_url).json()) 
 
 def turizem_podatki(url):
     poizvedba = {
@@ -54,7 +49,6 @@ def turizem_podatki(url):
 #print(rezultat['size'])    # koliko vrednosti ima vsaka
 
 def turizem_v_vrstice(podatki):
-    # razčlemba podatkov
     obcine_dim = podatki['dimension']['OBČINE']['category']
     drzava_dim = podatki['dimension']['DRŽAVA']['category']
     meritve_dim = podatki['dimension']['MERITVE']['category']
@@ -77,7 +71,6 @@ def turizem_v_vrstice(podatki):
     #stevila turistov / prenočitev
     vrednosti = podatki['value']
 
-    #grajenje vrstic
     vrstice = []
     stevec = 0
     for obcina_indeks in range(213):
@@ -102,8 +95,6 @@ def turizem_v_vrstice(podatki):
                     vrstice.append(vrstica)
 
     return vrstice
-
-# print(turizem_v_vrstice(turizem_podatki(turizem_api_url)))
 
 def write_csv(fieldnames, rows, directory, filename):
     # fieldnames - imena stolpcev, rows - seznam slovarjev, directory - mapa kamor shrani datoteko s podatki, filename - ime datoteke s podatki

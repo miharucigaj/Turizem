@@ -6,8 +6,6 @@ import requests
 prebivalstvo_api_url = 'https://pxweb.stat.si:443/SiStatData/api/v1/sl/Data/05C5003S.px'
 # mapa, v katero bomo shranili podatke
 prebivalstvo_directory = 'podatki'
-# ime datoteke v katero bomo shranili glavno stran
-frontpage_filename = 'prebivalstvo_obcine.json'
 # ime CSV datoteke v katero bomo shranili podatke
 csv_filename = 'prebivalstvo_obcine.csv'
 
@@ -77,7 +75,6 @@ def prebivalstvo_v_vrstice(podatki):
     #stevila prebivalcev
     vrednosti = podatki['value']
 
-    #grajenje vrstic
     vrstice = []
     stevec = 0
     for obcina_indeks in range(213):
